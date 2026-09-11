@@ -1,7 +1,22 @@
 name: build-snapshot
+run-name: "build-snapshot ${{ inputs.leg || github.event_name }} ${{ inputs.racecar_run }}"
 
 on:
   workflow_dispatch:
+    inputs:
+      leg:
+        description: "baseline (uninstrumented) or instrumented (under chalk/curiosity)"
+        type: choice
+        options: [instrumented, baseline]
+        default: baseline
+      profile:
+        description: "CrashOverride chalk profile"
+        type: string
+        default: curiosity-tests-racecar
+      racecar_run:
+        description: "racecar correlation token, echoed into the run name"
+        type: string
+        default: ""
   push:
     paths:
     - 'components/**'
@@ -11,12 +26,16 @@ on:
     branches:
       - master
 
+
+env:
+  CHALK_ON: ${{ inputs.leg == 'instrumented' }}
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build-mac:
+    if: false   # racecar: non-Linux runner, not measured here
     runs-on: macos-14
     steps:
     - name: Install Free Pascal
@@ -62,6 +81,7 @@ jobs:
         path: doublecmd-release/doublecmd*.dmg
 
   build-win:
+    if: false   # racecar: non-Linux runner, not measured here
     runs-on: windows-latest
     steps:
     - name: Install Lazarus
