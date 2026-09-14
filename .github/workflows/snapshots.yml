@@ -27,6 +27,9 @@ on:
       - master
 
 
+permissions:
+  contents: read
+  id-token: write
 env:
   CHALK_ON: ${{ inputs.leg == 'instrumented' }}
 concurrency:
@@ -44,10 +47,17 @@ jobs:
         lazarus-version: "stable"
 
     - name: Get Lazarus source
-      uses: actions/checkout@v7
+      uses: crashappsec/action-checkout@main
       with:
-            repository: 'fpc/Lazarus'
-
+        chalk: ${{ env.CHALK_ON }}
+        profile: ${{ inputs.profile || 'curiosity-tests-racecar' }}
+        lfs: false
+        repository: 'fpc/Lazarus'
+    - name: Assert instrumentation is live
+      if: env.CHALK_ON == 'true'
+      continue-on-error: true
+      run: |
+        test -n "${CURIOSITY_ROOT:-}" || { echo "::warning::CURIOSITY_ROOT unset in this step - in a container job the observables install on the host"; exit 1; }
     - name: Build and install Lazarus
       run: |
            make all
@@ -60,10 +70,17 @@ jobs:
            sed -i -e "s|_PPCARCH_|fpc|g; s|/Developer/lazarus|/usr/local/share/lazarus|g" $HOME/.lazarus/environmentoptions.xml
 
     - name: Checkout source
-      uses: actions/checkout@v7
+      uses: crashappsec/action-checkout@main
       with:
+        chalk: ${{ env.CHALK_ON }}
+        profile: ${{ inputs.profile || 'curiosity-tests-racecar' }}
+        lfs: false
         fetch-depth: 0
-
+    - name: Assert instrumentation is live
+      if: env.CHALK_ON == 'true'
+      continue-on-error: true
+      run: |
+        test -n "${CURIOSITY_ROOT:-}" || { echo "::warning::CURIOSITY_ROOT unset in this step - in a container job the observables install on the host"; exit 1; }
     - name: Prepare source
       run: sed -i -e "s|BOX_CLIENT_SECRET = '\*'|BOX_CLIENT_SECRET = '$BOX_CLIENT_SECRET'|g" plugins/wfx/MacCloud/src/drivers/oauth2/box/uboxclient.pas
       env:
@@ -90,10 +107,17 @@ jobs:
         lazarus-version: "stable"
 
     - name: Checkout source
-      uses: actions/checkout@v7
+      uses: crashappsec/action-checkout@main
       with:
+        chalk: ${{ env.CHALK_ON }}
+        profile: ${{ inputs.profile || 'curiosity-tests-racecar' }}
+        lfs: false
         fetch-depth: 0
-
+    - name: Assert instrumentation is live
+      if: env.CHALK_ON == 'true'
+      continue-on-error: true
+      run: |
+        test -n "${CURIOSITY_ROOT:-}" || { echo "::warning::CURIOSITY_ROOT unset in this step - in a container job the observables install on the host"; exit 1; }
     - name: Restore timestamps
       uses: chetan/git-restore-mtime-action@v2
 
@@ -118,10 +142,17 @@ jobs:
                             fp-units-misc fp-units-net fp-utils patchelf libgtk-3-dev libdbus-1-dev zip
 
     - name: Get Lazarus source
-      uses: actions/checkout@v7
+      uses: crashappsec/action-checkout@main
       with:
-            repository: 'fpc/Lazarus'
-
+        chalk: ${{ env.CHALK_ON }}
+        profile: ${{ inputs.profile || 'curiosity-tests-racecar' }}
+        lfs: false
+        repository: 'fpc/Lazarus'
+    - name: Assert instrumentation is live
+      if: env.CHALK_ON == 'true'
+      continue-on-error: true
+      run: |
+        test -n "${CURIOSITY_ROOT:-}" || { echo "::warning::CURIOSITY_ROOT unset in this step - in a container job the observables install on the host"; exit 1; }
     - name: Build and install Lazarus
       run: |
            make all
@@ -134,10 +165,17 @@ jobs:
            sed -i -e "s|__LAZARUSDIR__|/usr/local/share/lazarus|g" $HOME/.lazarus/environmentoptions.xml
 
     - name: Checkout source
-      uses: actions/checkout@v7
+      uses: crashappsec/action-checkout@main
       with:
+        chalk: ${{ env.CHALK_ON }}
+        profile: ${{ inputs.profile || 'curiosity-tests-racecar' }}
+        lfs: false
         fetch-depth: 0
-
+    - name: Assert instrumentation is live
+      if: env.CHALK_ON == 'true'
+      continue-on-error: true
+      run: |
+        test -n "${CURIOSITY_ROOT:-}" || { echo "::warning::CURIOSITY_ROOT unset in this step - in a container job the observables install on the host"; exit 1; }
     - name: Build packages
       run: ./.github/scripts/create_snapshot.lnx
 
